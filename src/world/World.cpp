@@ -4,6 +4,7 @@
 #include "core/AssetManager.h"
 #include "physics/FlightPhysics.h"
 #include "physics/CollisionSystem.h"
+#include "rendering/SolarSystem.h"
 #include "systems/ReactorSystem.h"
 #include "systems/WeaponSystem.h"
 #include "systems/PowerupSystem.h"
@@ -81,6 +82,28 @@ void World::Init(AssetManager& assets) {
 void World::Update(float dt, const InputState& input, Game& game) {
     // --- Player flight ---
     FlightPhysics::Integrate(player.body, input, player.flightParams, dt);
+
+    // --- Solar system gravity ---
+    // Pull player toward each body: a = gm / r², clamped to body surface so
+    // r never reaches zero.  Only applied in Sol (System 1); Alpha Station
+    // space is gravity-free for gameplay clarity.
+    if (!inSystem2) {
+        auto applyGravity = [&](Vector3 bodyPos, float gm, float minR) {
+            Vector3 toBody = Vector3Subtract(bodyPos, player.body.position);
+            float distSq   = Vector3DotProduct(toBody, toBody);
+            float dist     = sqrtf(distSq);
+            if (dist < minR) dist = minR;               // don't go inside the body
+            float accel    = gm / (dist * dist);
+            Vector3 dir    = Vector3Scale(toBody, 1.0f / dist);
+            player.body.velocity = Vector3Add(player.body.velocity,
+                                              Vector3Scale(dir, accel * dt));
+        };
+
+        applyGravity(STAR_POS, STAR_GM, STAR_RADIUS);
+        for (int i = 0; i < PLANET_COUNT; i++) {
+            applyGravity(PLANETS[i].pos, PLANETS[i].gm, PLANETS[i].radius);
+        }
+    }
 
     // --- Environment collision ---
     // Moon surface floor (Y = -5)
