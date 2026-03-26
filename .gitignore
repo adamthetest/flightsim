@@ -1,0 +1,6 @@
+.deck_ip
+build/
+build-steamdeck/
+dist/
+*.tar.gz
+.claude/
