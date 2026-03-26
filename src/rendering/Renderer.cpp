@@ -89,6 +89,16 @@ void Renderer::BeginFrame(const Vector3& shipPos, const Vector3& shipForward,
 }
 
 void Renderer::Draw3D(World& world, AssetManager& assets) {
+    // Star — draw corona rings first (largest to smallest) so the bright core
+    // model renders on top. Position: (0, 0, 1000) — straight out from the moon,
+    // opposite the tunnel entrance. Radius 40 units matches the GLB sphere.
+    static const Vector3 starPos = {0.0f, 0.0f, 1000.0f};
+    DrawSphereEx(starPos, 70.0f, 8, 12,  {255,  90,   5, 255}); // outer corona
+    DrawSphereEx(starPos, 56.0f, 10, 14, {255, 160,  30, 255}); // mid glow
+    DrawSphereEx(starPos, 44.0f, 12, 16, {255, 220,  80, 255}); // inner halo
+    DrawEntity(assets, "assets/models/environment/star.glb",
+               starPos, MatrixIdentity());
+
     // Environment (surface + tunnel) — draw first (opaque background geometry)
     world.moonEnv.Draw(assets);
 

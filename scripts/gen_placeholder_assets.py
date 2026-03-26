@@ -336,6 +336,37 @@ def make_moon_surface():
     return v, i
 
 
+def make_star():
+    """UV sphere representing the solar system's star. R=40 units."""
+    RINGS  = 12
+    SLICES = 16
+    R = 40.0
+
+    verts = []
+    tris  = []
+
+    for ring in range(RINGS + 1):
+        phi = np.pi * ring / RINGS          # 0 = north pole, pi = south pole
+        for sl in range(SLICES):
+            theta = 2 * np.pi * sl / SLICES
+            verts.append([
+                R * np.sin(phi) * np.cos(theta),
+                R * np.cos(phi),
+                R * np.sin(phi) * np.sin(theta),
+            ])
+
+    for ring in range(RINGS):
+        for sl in range(SLICES):
+            ns = (sl + 1) % SLICES
+            a = ring * SLICES + sl
+            b = ring * SLICES + ns
+            c = (ring + 1) * SLICES + sl
+            d = (ring + 1) * SLICES + ns
+            tris += [a, b, d, a, d, c]
+
+    return np.array(verts, dtype=np.float32), np.array(tris, dtype=np.uint32)
+
+
 def make_tunnel_section():
     """Hollow square tunnel: 4 walls (no end caps) as an 80-unit long passage."""
     LENGTH = 80.0
@@ -372,6 +403,7 @@ MODELS = [
     ("assets/models/environment/trade_station.glb", make_trade_station,  (0.8, 0.7, 0.3, 1.0)),
     ("assets/models/environment/moon_surface.glb",  make_moon_surface,   (0.6, 0.6, 0.65, 1.0)),
     ("assets/models/environment/tunnel_section_a.glb", make_tunnel_section, (0.4, 0.4, 0.5, 1.0)),
+    ("assets/models/environment/star.glb",          make_star,           (1.0, 0.85, 0.1, 1.0)),
 ]
 
 if __name__ == "__main__":

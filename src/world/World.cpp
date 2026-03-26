@@ -62,11 +62,12 @@ void World::SpawnTradeStation() {
 void World::Init(AssetManager& assets) {
     moonEnv.Init(assets);   // loads surface + tunnel models, builds colliders
 
-    // Pre-load ship models
+    // Pre-load models
     assets.GetModel("assets/models/ships/player_ship.glb");
     assets.GetModel("assets/models/ships/pirate_ship.glb");
     assets.GetModel("assets/models/props/powerup_neutrino.glb");
     assets.GetModel("assets/models/environment/trade_station.glb");
+    assets.GetModel("assets/models/environment/star.glb");
 
     SpawnEnemies();
     SpawnPowerups();
