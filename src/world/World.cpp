@@ -84,19 +84,42 @@ void World::Update(float dt, const InputState& input, Game& game) {
     FlightPhysics::Integrate(player.body, input, player.flightParams, dt);
 
     // --- Solar system gravity ---
-    // Pull player toward each body: a = gm / r², clamped to body surface so
-    // r never reaches zero.  Only applied in Sol (System 1); Alpha Station
-    // space is gravity-free for gameplay clarity.
+    // Pull: a = gm / r² toward each body.
+    // Surface bounce: when the player touches a body, the inward velocity component
+    // is reversed (with a small boost) while tangential velocity is preserved —
+    // this enables gravity-assist slingshot maneuvers.
+    // Disabled in System 2 so the endgame stays playable.
     if (!inSystem2) {
-        auto applyGravity = [&](Vector3 bodyPos, float gm, float minR) {
+        const float playerR = player.boundRadius;
+
+        auto applyGravity = [&](Vector3 bodyPos, float gm, float bodyRadius) {
             Vector3 toBody = Vector3Subtract(bodyPos, player.body.position);
-            float distSq   = Vector3DotProduct(toBody, toBody);
-            float dist     = sqrtf(distSq);
-            if (dist < minR) dist = minR;               // don't go inside the body
-            float accel    = gm / (dist * dist);
-            Vector3 dir    = Vector3Scale(toBody, 1.0f / dist);
+            float dist     = Vector3Length(toBody);
+            if (dist < 0.001f) return;
+
+            Vector3 toBodyNorm = Vector3Scale(toBody, 1.0f / dist);
+            float   minDist    = bodyRadius + playerR;
+
+            if (dist < minDist) {
+                // Reposition on the surface
+                player.body.position = Vector3Subtract(bodyPos,
+                    Vector3Scale(toBodyNorm, minDist));
+
+                // Reflect inward velocity — preserve tangential (slingshot effect).
+                // Multiplier > 2.0 gives a small exit boost as a reward.
+                float inward = Vector3DotProduct(player.body.velocity, toBodyNorm);
+                if (inward > 0.0f) {
+                    player.body.velocity = Vector3Subtract(
+                        player.body.velocity,
+                        Vector3Scale(toBodyNorm, inward * 2.08f)); // ~4% exit boost
+                }
+                dist = minDist;
+            }
+
+            // Gravitational pull
+            float accel = gm / (dist * dist);
             player.body.velocity = Vector3Add(player.body.velocity,
-                                              Vector3Scale(dir, accel * dt));
+                Vector3Scale(toBodyNorm, accel * dt));
         };
 
         applyGravity(STAR_POS, STAR_GM, STAR_RADIUS);
