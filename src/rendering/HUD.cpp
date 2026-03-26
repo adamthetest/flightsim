@@ -38,6 +38,7 @@ void HUD::DrawRadar(const HUDData& data, int cx, int cy, int radius) const {
 
     constexpr float RADAR_RANGE = 300.0f;
 
+    // Enemy dots — sized and clamped to radar range
     for (const auto& epos : data.enemyPositions) {
         Vector3 rel = Vector3Subtract(epos, data.playerPos);
         float dx = Vector3DotProduct(rel, right);
@@ -50,6 +51,20 @@ void HUD::DrawRadar(const HUDData& data, int cx, int cy, int radius) const {
         int sx = cx + (int)(dx / RADAR_RANGE * radius);
         int sy = cy - (int)(dz / RADAR_RANGE * radius);
         DrawCircle(sx, sy, 3, RED);
+    }
+
+    // Planet / star blips — always pinned to the radar edge (direction indicator only)
+    for (const auto& blip : data.planetBlips) {
+        Vector3 rel = Vector3Subtract(blip.pos, data.playerPos);
+        float dx = Vector3DotProduct(rel, right);
+        float dz = Vector3DotProduct(rel, fwd);
+        float dist = sqrtf(dx * dx + dz * dz);
+        if (dist < 0.1f) continue;
+        // Pin to 92% of radar radius so they sit just inside the outer ring
+        int sx = cx + (int)(dx / dist * radius * 0.92f);
+        int sy = cy - (int)(dz / dist * radius * 0.92f);
+        DrawCircle(sx, sy, 3, blip.color);
+        DrawCircleLines((float)sx, (float)sy, 4.5f, blip.color);
     }
 }
 

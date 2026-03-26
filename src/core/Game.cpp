@@ -1,5 +1,6 @@
 #include "core/Game.h"
 #include "rendering/ParticleSystem.h"
+#include "rendering/SolarSystem.h"
 #include "systems/TradingSystem.h"
 #include "raymath.h"
 #include <cstdio>
@@ -167,6 +168,12 @@ void Game::Draw() {
 
     for (const auto& e : m_world.enemies) {
         if (e->active) hudData.enemyPositions.push_back(e->position);
+    }
+
+    // Solar system bodies — always show as navigation blips
+    hudData.planetBlips.push_back({STAR_POS, {255, 230, 80, 255}});
+    for (int i = 0; i < PLANET_COUNT; i++) {
+        hudData.planetBlips.push_back({PLANETS[i].pos, PLANETS[i].radarColor});
     }
     for (const auto& ts : m_world.tradeStations) {
         if (ts->IsPlayerInDockRange(player.position)) {

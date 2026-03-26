@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include "raymath.h"
 
+struct RadarBlip { Vector3 pos; Color color; };
+
 // Plain data the HUD needs — avoids coupling to World.
 struct HUDData {
     float    reactorFuel  = 1.0f;   // 0..1
@@ -12,7 +14,8 @@ struct HUDData {
     int      neutrinos    = 0;
     Vector3  playerPos    = {0,0,0};
     Vector3  playerFwd    = {0,0,-1};
-    std::vector<Vector3> enemyPositions;
+    std::vector<Vector3>    enemyPositions;
+    std::vector<RadarBlip>  planetBlips;   // solar system bodies shown on radar
     bool     dockAvailable     = false;
     bool     tradeMenuOpen     = false;
     bool     warpUnlocked      = false;
