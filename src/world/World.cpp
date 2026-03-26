@@ -68,6 +68,10 @@ void World::Init(AssetManager& assets) {
     assets.GetModel("assets/models/props/powerup_neutrino.glb");
     assets.GetModel("assets/models/environment/trade_station.glb");
     assets.GetModel("assets/models/environment/star.glb");
+    assets.GetModel("assets/models/environment/planet_rock.glb");
+    assets.GetModel("assets/models/environment/planet_earth.glb");
+    assets.GetModel("assets/models/environment/planet_gas.glb");
+    assets.GetModel("assets/models/environment/planet_ice.glb");
 
     SpawnEnemies();
     SpawnPowerups();

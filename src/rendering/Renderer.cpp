@@ -6,6 +6,29 @@
 #include "rlgl.h"
 #include <string>
 
+// Solar system bodies — positions are world-space fixed coordinates.
+// Star sits at (0, 0, 1000). Planets are distributed around it.
+struct PlanetDesc {
+    const char* key;
+    Vector3     pos;
+    float       radius;   // must match the GLB sphere radius
+    Color       atmo;     // atmosphere halo colour drawn just outside the model
+};
+static const PlanetDesc PLANETS[] = {
+    // Rocky inner planet — between moon and star, small and dry
+    { "assets/models/environment/planet_rock.glb",
+      { 140.0f, -25.0f,  820.0f },  8.0f, { 210, 150,  80, 255 } },
+    // Earth-like planet — the moon's parent world, prominent to the left
+    { "assets/models/environment/planet_earth.glb",
+      {-380.0f,  85.0f,  660.0f }, 15.0f, {  80, 155, 255, 255 } },
+    // Gas giant — past the star, large and banded
+    { "assets/models/environment/planet_gas.glb",
+      { 520.0f, -55.0f, 1380.0f }, 45.0f, { 235, 175,  85, 255 } },
+    // Ice giant — outer system, cold blue-white
+    { "assets/models/environment/planet_ice.glb",
+      {-720.0f,  35.0f, 1520.0f }, 22.0f, { 145, 195, 255, 255 } },
+};
+
 void Renderer::Init(AssetManager& assets) {
     m_camera.fovy       = 70.0f;
     m_camera.projection = CAMERA_PERSPECTIVE;
@@ -98,6 +121,12 @@ void Renderer::Draw3D(World& world, AssetManager& assets) {
     DrawSphereEx(starPos, 44.0f, 12, 16, {255, 220,  80, 255}); // inner halo
     DrawEntity(assets, "assets/models/environment/star.glb",
                starPos, MatrixIdentity());
+
+    // Planets — atmosphere halo first (slightly larger), then model on top
+    for (const PlanetDesc& p : PLANETS) {
+        DrawSphereEx(p.pos, p.radius * 1.18f, 10, 14, p.atmo);
+        DrawEntity(assets, p.key, p.pos, MatrixIdentity());
+    }
 
     // Environment (surface + tunnel) — draw first (opaque background geometry)
     world.moonEnv.Draw(assets);

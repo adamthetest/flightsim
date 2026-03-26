@@ -336,35 +336,44 @@ def make_moon_surface():
     return v, i
 
 
-def make_star():
-    """UV sphere representing the solar system's star. R=40 units."""
-    RINGS  = 12
-    SLICES = 16
-    R = 40.0
-
+def make_sphere(radius, rings=12, slices=16):
+    """UV sphere of the given radius."""
     verts = []
     tris  = []
-
-    for ring in range(RINGS + 1):
-        phi = np.pi * ring / RINGS          # 0 = north pole, pi = south pole
-        for sl in range(SLICES):
-            theta = 2 * np.pi * sl / SLICES
+    for ring in range(rings + 1):
+        phi = np.pi * ring / rings
+        for sl in range(slices):
+            theta = 2 * np.pi * sl / slices
             verts.append([
-                R * np.sin(phi) * np.cos(theta),
-                R * np.cos(phi),
-                R * np.sin(phi) * np.sin(theta),
+                radius * np.sin(phi) * np.cos(theta),
+                radius * np.cos(phi),
+                radius * np.sin(phi) * np.sin(theta),
             ])
-
-    for ring in range(RINGS):
-        for sl in range(SLICES):
-            ns = (sl + 1) % SLICES
-            a = ring * SLICES + sl
-            b = ring * SLICES + ns
-            c = (ring + 1) * SLICES + sl
-            d = (ring + 1) * SLICES + ns
+    for ring in range(rings):
+        for sl in range(slices):
+            ns = (sl + 1) % slices
+            a = ring * slices + sl
+            b = ring * slices + ns
+            c = (ring + 1) * slices + sl
+            d = (ring + 1) * slices + ns
             tris += [a, b, d, a, d, c]
-
     return np.array(verts, dtype=np.float32), np.array(tris, dtype=np.uint32)
+
+
+def make_star():
+    return make_sphere(40.0)
+
+def make_planet_rock():
+    return make_sphere(8.0)
+
+def make_planet_earth():
+    return make_sphere(15.0)
+
+def make_planet_gas():
+    return make_sphere(45.0)
+
+def make_planet_ice():
+    return make_sphere(22.0)
 
 
 def make_tunnel_section():
@@ -403,7 +412,11 @@ MODELS = [
     ("assets/models/environment/trade_station.glb", make_trade_station,  (0.8, 0.7, 0.3, 1.0)),
     ("assets/models/environment/moon_surface.glb",  make_moon_surface,   (0.6, 0.6, 0.65, 1.0)),
     ("assets/models/environment/tunnel_section_a.glb", make_tunnel_section, (0.4, 0.4, 0.5, 1.0)),
-    ("assets/models/environment/star.glb",          make_star,           (1.0, 0.85, 0.1, 1.0)),
+    ("assets/models/environment/star.glb",          make_star,           (1.0, 0.85, 0.10, 1.0)),
+    ("assets/models/environment/planet_rock.glb",  make_planet_rock,   (0.55, 0.42, 0.30, 1.0)),
+    ("assets/models/environment/planet_earth.glb", make_planet_earth,  (0.20, 0.50, 0.85, 1.0)),
+    ("assets/models/environment/planet_gas.glb",   make_planet_gas,    (0.80, 0.62, 0.38, 1.0)),
+    ("assets/models/environment/planet_ice.glb",   make_planet_ice,    (0.60, 0.78, 0.92, 1.0)),
 ]
 
 if __name__ == "__main__":
